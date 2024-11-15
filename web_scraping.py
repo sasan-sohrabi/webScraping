@@ -102,6 +102,7 @@ try:
 except Exception as e:
     print("Error creating table:", e)
 
+# 4: Loop through each page and insert data into SQL Server
 last_page = int(driver.find_element(By.CSS_SELECTOR, "li.page-last a").text.strip())
 # data = []
 page = 0
@@ -128,7 +129,7 @@ while True:
         print("Encountered a stale element, retrying...")
         continue
 
-    # Navigate to next page
+    # Navigate to the next page if not the last
     if page < last_page:
         next_page = driver.find_element(By.CSS_SELECTOR, "li.page-next a")
         next_page.click()
@@ -143,8 +144,11 @@ while True:
 # Save to CSV
 # df = pd.DataFrame(data, columns=columns)
 # df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
-print("Data saved to ime_transaction_data.csv")
+# print("Data saved to ime_transaction_data.csv")
 
+# Close SQL Server connection and WebDriver
 cursor.close()
 conn.close()
 driver.quit()
+
+print("Data extraction and insertion completed successfully.")
