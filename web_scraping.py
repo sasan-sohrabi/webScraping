@@ -1,3 +1,4 @@
+import pyodbc
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -7,7 +8,16 @@ import pandas as pd
 import time
 import random
 
-# Initialize ChromeDriver
+# 1: Connect to SQL Server
+conn = pyodbc.connect(
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=.\SQLSERVERPY;"  # Replace with your server name
+    "DATABASE=IME_WebScraping;"  # Replace with your database name
+    "Trusted_Connection=yes;"
+)
+cursor = conn.cursor()
+
+# 2: Initialize ChromeDriver
 service = Service(r'C:\chromedriver-win64\chromedriver.exe')
 driver = webdriver.Chrome(service=service)
 
@@ -68,7 +78,7 @@ option_100 = wait.until(EC.element_to_be_clickable((By.XPATH, "//ul[@class='drop
 option_100.click()
 time.sleep(3)  # Wait for the table to reload with 100 rows
 
-# Extract headers
+# 3: Extract headers and Create table on database
 columns = []
 header_cells = driver.find_elements(By.CSS_SELECTOR, "#AmareMoamelatGridTbl thead th")
 for header in header_cells:
@@ -76,9 +86,24 @@ for header in header_cells:
     if header_text:
         columns.append(header_text)
 
-last_page = int(driver.find_element(By.CSS_SELECTOR, "li.page-last a").text.strip())
+# Define table creation query
+table_name = "IME_Transactions"
+create_table_query = f"CREATE TABLE {table_name} (ID INT IDENTITY(1,1) PRIMARY KEY, "
+for column in columns:
+    create_table_query += f"[{column}] NVARCHAR(MAX), "
+create_table_query = create_table_query.rstrip(", ") + ");"
 
-data = []
+# Execute table creation
+try:
+    cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
+    cursor.execute(create_table_query)
+    conn.commit()
+    print(f"Table '{table_name}' created successfully.")
+except Exception as e:
+    print("Error creating table:", e)
+
+last_page = int(driver.find_element(By.CSS_SELECTOR, "li.page-last a").text.strip())
+# data = []
 page = 0
 while True:
     page += 1
@@ -90,7 +115,15 @@ while True:
             rows = driver.find_elements(By.CSS_SELECTOR, "#AmareMoamelatGridTbl tbody tr")  # Refresh rows
             cells = rows[i].find_elements(By.TAG_NAME, "td")
             cell_data = [cell.get_attribute("innerText").strip() for cell in cells]
-            data.append(cell_data)
+            # data.append(cell_data)
+
+            placeholders = ", ".join(["?"] * len(columns))
+            insert_query = f"INSERT INTO {table_name} ({', '.join(['[' + col + ']' for col in columns])}) VALUES ({placeholders})"
+            cursor.execute(insert_query, cell_data)
+
+        # Commit after each page
+        conn.commit()
+
     except:
         print("Encountered a stale element, retrying...")
         continue
@@ -108,8 +141,10 @@ while True:
 
 
 # Save to CSV
-df = pd.DataFrame(data, columns=columns)
-df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
-
+# df = pd.DataFrame(data, columns=columns)
+# df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
 print("Data saved to ime_transaction_data.csv")
+
+cursor.close()
+conn.close()
 driver.quit()
