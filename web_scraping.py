@@ -83,5 +83,5 @@ for row in rows:
 df = pd.DataFrame(data, columns=columns)
 df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
 
-print("Data saved to ime_transaction_data_.csv")
+print("Data saved to ime_transaction_data__.csv")
 driver.quit()
