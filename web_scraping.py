@@ -67,21 +67,43 @@ for header in header_cells:
     if header_text:
         columns.append(header_text)
 
-data = []
-for row in rows:
-    cells = row.find_elements(By.TAG_NAME, "td")
-    cell_data = []
-    for cell in cells:
-        # Replace unwanted HTML elements with "N/A" or clean them
-        text = cell.get_attribute("innerText").replace('<i class="fa fa-exclamation"></i>', 'N/A').strip()
-        cell_data.append(text)
+last_page = int(driver.find_element(By.CSS_SELECTOR, "li.page-last a").text.strip())
 
-    # Add the data from this page to all_data
-    data.append(cell_data)
+data = []
+page = 0
+while True:
+    page += 1
+    print(page)
+    try:
+        # Re-fetch rows to avoid stale element reference
+        rows = driver.find_elements(By.CSS_SELECTOR, "#AmareMoamelatGridTbl tbody tr")
+        for i in range(len(rows)):
+            rows = driver.find_elements(By.CSS_SELECTOR, "#AmareMoamelatGridTbl tbody tr")  # Refresh rows
+            cells = rows[i].find_elements(By.TAG_NAME, "td")
+            cell_data = [cell.get_attribute("innerText").strip() for cell in cells]
+            data.append(cell_data)
+    except:
+        print("Encountered a stale element, retrying...")
+        continue
+
+    # Navigate to next page
+    if page < last_page:
+        next_page = driver.find_element(By.CSS_SELECTOR, "li.page-next a")
+        next_page.click()
+        print("clicked next page")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#AmareMoamelatGridTbl tbody tr"))
+        )
+    else:
+        break
+
+# display_button = driver.find_element(By.CSS_SELECTOR, "page-next a")
+# display_button.click()
+
 
 # Save to CSV
-df = pd.DataFrame(data, columns=columns)
-df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
+# df = pd.DataFrame(data, columns=columns)
+# df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
 
 print("Data saved to ime_transaction_data.csv")
 driver.quit()
