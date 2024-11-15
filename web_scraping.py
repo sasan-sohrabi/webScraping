@@ -59,6 +59,15 @@ while True:
     else:
         break
 
+# Click the page-size dropdown button to display options
+page_size_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "span.page-list button")))
+page_size_button.click()
+
+# Select the "100" option from the dropdown
+option_100 = wait.until(EC.element_to_be_clickable((By.XPATH, "//ul[@class='dropdown-menu']//a[text()='100']")))
+option_100.click()
+time.sleep(3)  # Wait for the table to reload with 100 rows
+
 # Extract headers
 columns = []
 header_cells = driver.find_elements(By.CSS_SELECTOR, "#AmareMoamelatGridTbl thead th")
@@ -97,13 +106,10 @@ while True:
     else:
         break
 
-# display_button = driver.find_element(By.CSS_SELECTOR, "page-next a")
-# display_button.click()
-
 
 # Save to CSV
-# df = pd.DataFrame(data, columns=columns)
-# df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
+df = pd.DataFrame(data, columns=columns)
+df.to_csv("ime_transaction_data.csv", index=False, encoding="utf-8-sig")
 
 print("Data saved to ime_transaction_data.csv")
 driver.quit()
