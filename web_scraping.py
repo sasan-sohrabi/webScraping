@@ -11,8 +11,8 @@ import random
 # 1: Connect to SQL Server
 conn = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=.\SQLSERVERPY;"  # Replace with your server name
-    "DATABASE=IME_WebScraping;"  # Replace with your database name
+    "SERVER=.\SQLSERVERPY;"  
+    "DATABASE=IME_WebScraping;"  
     "Trusted_Connection=yes;"
 )
 cursor = conn.cursor()
