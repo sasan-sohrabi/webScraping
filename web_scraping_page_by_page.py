@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
+import pandas as pd
 
 # 1: Connect to SQL Server
 conn = pyodbc.connect(
@@ -17,7 +18,16 @@ conn = pyodbc.connect(
 cursor = conn.cursor()
 
 # Define dates
-dates = [["1403/08/01", "1403/08/07"], ["1403/08/08", "1403/08/15"], ["1403/08/16", "1403/08/23"], ["1403/08/23", "1403/08/30"],]
+date_source = pd.read_excel("DimDate.xlsx")
+dates_list = date_source["time_Title_Year_Month_Day"].values.tolist()
+dates = []
+count = 19
+for i in range(0, len(dates_list) - 20, 20):
+    dates.append([dates_list[i], dates_list[count]])
+    count += 20
+#dates = [["1403/08/01", "1403/08/07"], ["1403/08/08", "1403/08/15"], ["1403/08/16", "1403/08/23"], ["1403/08/23", "1403/08/30"]]
+
+
 for row, date in enumerate(dates):
 
     # 2: Initialize ChromeDriver
