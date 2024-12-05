@@ -21,10 +21,10 @@ cursor = conn.cursor()
 date_source = pd.read_excel("DimDate.xlsx")
 dates_list = date_source["time_Title_Year_Month_Day"].values.tolist()
 dates = []
-count = 19
-for i in range(0, len(dates_list) - 20, 20):
+count = 9
+for i in range(0, len(dates_list) - 10, 10):
     dates.append([dates_list[i], dates_list[count]])
-    count += 20
+    count += 10
 #dates = [["1403/08/01", "1403/08/07"], ["1403/08/08", "1403/08/15"], ["1403/08/16", "1403/08/23"], ["1403/08/23", "1403/08/30"]]
 
 
