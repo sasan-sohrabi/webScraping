@@ -1,27 +1,10 @@
-import pandas as pd
-from sqlalchemy import create_engine
-import pyodbc
+from traceback import print_tb
 
-# Define the connection string
-conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=.\sasanpy;"  # Local server instance
-    "DATABASE=PlaceTemp;"  # Replace with the name of your database
-    "Trusted_Connection=yes;"  # Use Windows Authentication
-)
+test = """commodity_name, symbol, hall, producer, contract_type, avg_closing_price,
+        transaction_value, closing_price, lowest_price, highest_price, base_price,
+        supply_volume, demand_volume, contract_volume, unit, transaction_date, delivery_date,
+        delivery_location, seller, settlement_price_date, broker, offer_method, purchase_method,
+        packaging_type, settlement_type, currency_type, offer_code"""
 
-# Establish connection
-try:
-
-    # Query data
-    query = "SELECT * FROM dbo.Place"
-    df = pd.read_sql(query, conn)
-
-    # Display the data
-    row_count = len(df)
-    print(f"Number of rows: {row_count}")
-
-    # Close the connection
-    conn.close()
-except Exception as e:
-    print(f"Error: {e}")
+test_list = test.split(',')
+print(len(test_list))
